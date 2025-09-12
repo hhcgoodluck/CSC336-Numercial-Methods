@@ -1,2 +1,3 @@
 # CSC336-Numercial-Methods
-Course Assignments
+
+Course Assignments (Have some small mistakes, have not correct)
