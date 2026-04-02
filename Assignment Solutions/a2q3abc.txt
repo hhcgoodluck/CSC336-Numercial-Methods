@@ -1,0 +1,103 @@
+
+Assignment Two, Question Three
+==============================
+
+Part (a)
+
+In this part of the question we are to implement functions that
+solve the linear system  Ax=b using
+
+   - Gauss elimination without any pivoting
+   - Gauss elimination with partial row pivoting
+   - Gauss elimination with complete pivoting
+
+This is done most easily by starting with the simple GE algorithm
+given in lectures, and then modifying it to first include partial 
+row pivoting and then complete pivoting.    Since we only need to
+solve Ax=b, and not return the factorization of A, we can update
+b as the elimination is done.    The pivoting can be implemented
+by keeping track of "permutation" vectors, and then addressing 
+the matrix elements indirectly via the "permutation" vectors.
+
+See the file a2q3a.py for a sample solution.
+
+Parts (b) and (c):
+
+NOTE: The handout said to generate linear systems for testing that
+used the true solution x where x_i = (-1)^{i+1}.  It turns out that
+for this x, the structure of the Heath Computer Problem 2.7 matrix was
+such that the 3 algorithms produced the correct result for most dimensions
+n, though for some n, no pivoting and partial pivoting produced erroneous
+results.  In order to demonstrate the issue of interest, in my results, 
+I used a random x instead of the x with x_i = (-1)^{i+1}.
+
+
+Testing of the functions from Part (a) and demonstration of improved
+accuracy from using complete pivoting.
+
+The testing is accomplished by performing the following operations:
+
+  - pick a dimension n
+  - generate a random coefficient matrix A
+  - generate a random true solution x_true 
+  - determine the right hand side b so that A*x_true
+  - solve the problem Ax = b using the functions from Part (a)
+    and determining the error and residuals for the computed solutions
+
+Also, for Part (c), given the information in Computer Problem 2.7, we expect
+that GE with complete pivoting will compute a better solution than
+GE with row (or no) pivoting when the coefficient matrix has the same
+structure as in Computer Problem 2.7.
+
+Here is the output from running the sample a2q3a.py program: 
+
+First 8 random systems with random dimension are examined,
+and 8 systems with coefficient matrix as in CP 2.7 are examined.
+
+Random matrix results : 
+
+          |   NO PIVOTING     |   ROW PIVOTING    | COMPLETE PIVOTING
+          | relative relative | relative relative | relative relative
+dimension | residual error    | residual error    | residual error
+=====================================================================
+  66       1.31e-14  1.89e-13  1.19e-15  2.41e-14  5.10e-16  3.07e-14  
+  87       2.28e-14  2.94e-11  9.33e-16  4.26e-12  6.66e-16  3.73e-12  
+  66       1.27e-14  8.21e-13  5.23e-16  2.91e-14  5.23e-16  5.78e-14  
+  97       2.46e-14  1.08e-12  7.65e-16  8.11e-14  7.65e-16  8.06e-14  
+  80       1.28e-14  1.56e-12  8.03e-16  3.21e-14  8.03e-16  1.25e-13  
+  74       1.66e-14  2.14e-11  7.76e-16  3.28e-13  7.76e-16  1.94e-12  
+  20       5.65e-16  6.83e-15  4.24e-16  6.19e-15  4.24e-16  4.74e-15  
+  59       9.08e-13  6.60e-12  6.24e-16  3.47e-14  4.16e-16  4.28e-14  
+
+
+Heath Computer Problem 2.7 matrix results : 
+
+          |   NO PIVOTING     |   ROW PIVOTING    | COMPLETE PIVOTING
+          | relative relative | relative relative | relative relative
+dimension | residual error    | residual error    | residual error
+=====================================================================
+  39       5.43e-07  4.74e-06  5.43e-07  4.74e-06  3.77e-16  6.01e-15  
+  44       3.51e-06  4.86e-05  3.51e-06  4.86e-05  5.06e-16  2.79e-15  
+  14       3.99e-14  1.57e-13  3.99e-14  1.57e-13  8.07e-17  5.08e-16  
+  64       1.38e-01  8.19e-01  1.38e-01  8.19e-01  1.61e-16  2.68e-15  
+  31       2.43e-09  3.18e-08  2.43e-09  3.18e-08  2.83e-17  1.00e-15  
+  40       1.91e-07  1.79e-06  1.91e-07  1.79e-06  3.36e-16  3.17e-15  
+  53       1.10e-03  1.56e-02  1.10e-03  1.56e-02  2.93e-16  3.07e-15  
+   9       4.41e-15  1.08e-14  4.41e-15  1.08e-14  6.48e-17  2.29e-16
+
+    
+    
+We observe that:
+  - for random matrices, the 3 methods all generate solutions with 
+     fairly small relative residuals and relative errors
+  - for the matrices of the form from CP 2.7, the relative error and 
+     relative residuals from the NO PIVOTING and ROW PIVOTING functions can
+     be very large (and hence the solutions are not accurate).  However
+     the relative error and relative residuals from the COMPLETE PIVOTING
+     are very small.  Accurate solutions have been computed.
+
+Hence, for random matrices, complete pivoting (which is more expensive to
+run) may not be required for the computation of accurate solutions.   
+However, for matrices with a given structure, complete pivoting may be 
+essential for the computation of an accurate solution.
+

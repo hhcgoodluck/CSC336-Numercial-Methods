@@ -1,0 +1,158 @@
+
+===============================================================================
+
+In lectures you learned that row interchanges are required to 
+remove 0 entries from the diagonal during Gaussian Elimination so that
+divide-by-zeros are avoided.  You have also learned that
+the GE algorithm can be numerically unstable if the diagonal element is
+much smaller than the elements being eliminated.  This instability can
+be avoided if we interchange rows so as to make the largest element in 
+the column be on the diagonal.  This technique is called "partial (row) 
+pivoting".  It ensures that the multipliers are less than 1 in size.
+
+It turns out that the elementary row operation   R_j  <->  R_k
+can be thought of as multiplying the matrix under elimination on the left
+by a permutation matrix P that is formed by taking the identity matrix I and 
+interchanging rows j and k.
+
+Let's do a dimension 3 LU factorization with row interchanges so that we
+can see how pivoting affects the LU decomposition algorithm.
+
+Consider the matrix
+
+      (  4   -4  10  )
+  A = (  2    0   3  )
+      (  8   -4  12  )
+
+When computing the LU decomposition using Gaussian Elimination with partial
+(row) pivoting, we search down the pivot column and interchange rows so
+that the diagonal element is larger than all of the elements below it.
+(This forces the resulting multipliers to be less than or equal to 1 in size.)
+
+Let i represent the number of the column that contains the entries that 
+are being eliminated.
+
+=========
+| i = 1 |
+=========
+
+Search through the elements  a_{j,i}, j = i,...,n to determine the largest
+entry.  We find that it is the value 8 in the (3,1) position.  Therefore,
+perform the row interchange  row R_1  <-->  row R_3.
+
+This is equivalent to multiplying A from the left with  
+
+          ( 0 0 1 )
+P_{1,3} = ( 0 1 0 ),  which is the identity matrix I with row R_1 <-> row R_3.
+          ( 1 0 0 )
+             
+                 (  8   -4  12  )
+Then P_{1,3}*A = (  2    0   3  )
+                 (  4   -4  10  )
+
+Perform the elimination on (P_{1,3}*A).
+                                       (  8   -4  12  )
+R_2 <- R_2 - (2/8) R_1   gives   U_1 = (  0    1   0  )
+R_3 <- R_3 - (4/8) R_1                 (  0   -2   4  )
+
+                               (  1   0  0 )
+Therefore if we define  M_1 =  ( -1/4 1  0 )
+                               ( -1/2 0  1 )
+
+then we have :  M_1 P_{1,3} A = U_1    
+
+Now we are set to tackle the second column of U_1.
+
+=========
+| i = 2 |
+=========
+
+Search down the second column of 
+
+         (  8   -4  12  )
+   U_1 = (  0    1   0  )
+         (  0   -2   4  )
+
+to find the largest element on or below the diagonal.  We find that it 
+is -2 in position (3,2).  Therefore we need to interchange rows 2 and 3
+of U_1.   This is equivalent to multiplying U_1 from the left with
+
+           ( 1 0 0 )
+ P_{2,3} = ( 0 0 1 ),  which is the identity matrix I with row R_2 <-> row R_3.
+           ( 0 1 0 )
+             
+                           (  8   -4  12  )
+Therefore   P_{2,3}*U_1 =  (  0   -2   4  )
+                           (  0    1   0  )
+
+Perform the elimination on this matrix P_{2,3}*U_1.
+                                                    (  8   -4  12  )
+We perform  R_3 <- R_3 - (-1/2)R_2   to get  U_2 =  (  0   -2   4  )
+                                                    (  0    0   2  )
+
+In other words,   M_2*P_{2,3}*U_1 = U_2  
+
+          (  1   0   0  )
+for M_2 = (  0   1   0  )
+          (  0  1/2  1  ).
+
+
+Since U_2 is in upper triangular form, lets call it U.
+
+                       (  8   -4  12  )
+Therefore we have  U = (  0   -2   4  )
+                       (  0    0   2  )
+
+Altogether then, we have
+
+     M_2*P_{2,3}*U_1 = U
+
+but U_1 = M_1*P_{1,3}*A  and so we have the messy expression : 
+
+   M_2*P_{2,3}*M_1*P_{1,3}*A = U.
+
+The Gauss Elimination algorithm with partial pivoting leads to a 
+factorization of A that is usually expressed as:
+
+   PA = LU    where P = P_{2,3} * P_{1,3}.
+
+It turns out that the L matrix can be constructed in a similar way as
+before, but we need to update the order of the multipliers to account 
+for row interchanges.
+
+So we have:
+                                           ~                  ~
+  P = P_{2,3}*P_{1,3}        and L = ( M_2*M_1 )^{-1}   where M_1 = M_1
+                                                    with M1_{2,1} <-> M1_{3,1}
+                                     ~
+    = ( 1 0 0 ) ( 0 0 1 )          = M_1^{-1} * M_2^{-1}
+      ( 0 0 1 ) ( 0 1 0 ) 
+      ( 0 1 0 ) ( 1 0 0 )          = ( 1   0  0 ) (  1   0  0  )  (by Gauss   )
+                                     ( 1/2 1  0 ) (  0   1  0  )  (Transform  )
+                                     ( 1/4 0  1 ) (  0 -1/2 1  )  (properties )
+    = ( 0 0 1 )       
+      ( 1 0 0 )                    = ( 1    0    0 )
+      ( 0 1 0 )                      ( 1/2  1    0 )
+                                     ( 1/4 -1/2  1 )
+
+Our factorization becomes : 
+
+    ( 0 0 1 )( 4  -4  10 )    ( 1    0    0 ) (  8   -4  12  )
+    ( 1 0 0 )( 2   0   3 ) =  ( 1/2  1    0 ) (  0   -2   4  )
+    ( 0 1 0 )( 8  -4  12 )    ( 1/4 -1/2  1 ) (  0    0   2  )
+
+Exercise: Muliply out both sides to confirm.
+
+NOTE:  When we use this form in the "solving" phase, we need to
+remember that   Ax = b
+        implies PAx = Pb
+        or      LUx = Pb,
+so we need to solve   Ly = Pb for y, using forward substitution,
+and then solve  Ux = y for y using backward substitution.
+
+NOTE:  In the example above, rows were physically interchanged.  This step
+can be eliminated if the row indices are determined indirectly using a 
+piv vector that keeps track of the pivoting.  A reference to A(i,j) becomes
+a reference to A(piv(i),j).
+==========================================================================
+
